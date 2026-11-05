@@ -1,0 +1,58 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from rokoko_omnihand_msgs/msg/RawHandFrame.msg
+// generated code does not contain a copyright notice
+
+#include "geometry_msgs/msg/Point.idl"
+#include "geometry_msgs/msg/Quaternion.idl"
+#include "std_msgs/msg/Header.idl"
+
+module rokoko_omnihand_msgs {
+  module msg {
+    typedef string string__21[21];
+    typedef geometry_msgs::msg::Point geometry_msgs__msg__Point;
+    typedef geometry_msgs__msg__Point geometry_msgs__msg__Point__21[21];
+    typedef geometry_msgs::msg::Quaternion geometry_msgs__msg__Quaternion;
+    typedef geometry_msgs__msg__Quaternion geometry_msgs__msg__Quaternion__21[21];
+    @verbatim (language="comment", text=
+      "RawHandFrame — per-side Rokoko raw hand frame published by the Rokoko receiver" "\n"
+      "node on /rokoko/{left,right}/raw_hand. Read-only source data for retargeting." "\n"
+      "" "\n"
+      "Hand side is expressed by the Topic name, NOT by a field here (Spec decision 5)." "\n"
+      "The canonical 21 Rokoko node spellings are NOT owned by this package; they are" "\n"
+      "fixed by the versioned official JSON v3 fixture in rokoko_hand_receiver. This" "\n"
+      "message only carries the 21 names/positions/quaternions as data arrays, already" "\n"
+      "reordered into the project canonical order (Spec decision 6):" "\n"
+      "  Hand, then Thumb/Index/Middle/Ring/Little, each Proximal/Medial/Distal/Tip.")
+    struct RawHandFrame {
+      @verbatim (language="comment", text=
+        "stamp = local ROS time at which the UDP datagram was received on this host" "\n"
+        "(Spec decisions 4, 50). frame_id is set by the publisher and is not used to" "\n"
+        "encode the hand side.")
+      std_msgs::msg::Header header;
+
+      @verbatim (language="comment", text=
+        "The single Rokoko Actor selected for this run (Spec decision 3). One run" "\n"
+        "selects exactly one Actor (configurable index, default 0).")
+      uint32 actor_index;
+
+      string actor_name;
+
+      @verbatim (language="comment", text=
+        "Scene-level source timestamp carried VERBATIM from the Rokoko source (Spec" "\n"
+        "decisions 4, 50). Its epoch/unit is UNCONFIRMED: it MUST NOT be converted to" "\n"
+        "ROS time, subtracted from ROS time or used for control timing.")
+      double source_timestamp;
+
+      @verbatim (language="comment", text=
+        "Canonical-ordered 21 node data arrays (Spec decisions 5, 6, 49)." "\n"
+        "Positions are Rokoko world coordinates, unmodified: no re-relativization," "\n"
+        "mirroring, filtering or normalization (Spec decision 7)." "\n"
+        "Orientations are x, y, z, w quaternions, unmodified (Spec decision 7).")
+      string__21 node_names;
+
+      geometry_msgs__msg__Point__21 positions;
+
+      geometry_msgs__msg__Quaternion__21 orientations;
+    };
+  };
+};

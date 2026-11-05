@@ -1,0 +1,99 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from rokoko_omnihand_msgs/msg/O10ControlState.msg
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Time.idl"
+#include "std_msgs/msg/Header.idl"
+
+module rokoko_omnihand_msgs {
+  module msg {
+    typedef boolean boolean__10[10];
+    typedef uint16 uint16__10[10];
+    module O10ControlState_Constants {
+      const uint8 EVENT_STARTUP = 0;
+      const uint8 EVENT_TARGET_PROCESSED = 1;
+      const uint8 EVENT_TARGET_TIMEOUT = 2;
+      const uint8 EVENT_FEEDBACK_RECEIVED = 3;
+      const uint8 EVENT_ERROR_STATUS_RECEIVED = 4;
+      const uint8 EVENT_OPERATOR_REQUEST = 5;
+      const uint8 EVENT_FAULT_CHANGED = 6;
+      const uint8 EVENT_COMPONENT_STATE_CHANGED = 7;
+      const uint8 PHASE_INITIALIZING = 0;
+      const uint8 PHASE_IDLE_NOT_READY = 1;
+      const uint8 PHASE_IDLE_READY = 2;
+      const uint8 PHASE_ACTIVE = 3;
+      const uint8 PHASE_PAUSED_TARGET_STALE = 4;
+      const uint8 PHASE_FAULT_LATCHED = 5;
+      const uint8 TARGET_NOT_EVALUATED = 0;
+      const uint8 TARGET_SENT = 1;
+      const uint8 TARGET_VALID_MOTION_DISABLED = 2;
+      const uint8 TARGET_REJECTED_SCHEMA = 3;
+      const uint8 TARGET_REJECTED_NAME_ORDER = 4;
+      const uint8 TARGET_REJECTED_NONFINITE = 5;
+      const uint8 TARGET_REJECTED_LIMIT = 6;
+      const uint8 TARGET_REJECTED_AUX_FIELDS = 7;
+      const uint8 TARGET_REJECTED_TIMESTAMP = 8;
+      const uint8 TARGET_REJECTED_CONTROL_STATE = 9;
+      const uint32 FAULT_HARDWARE_ERROR = 1;
+      const uint32 FAULT_COMMAND_READBACK_TIMEOUT = 2;
+      const uint32 FAULT_INVALID_FEEDBACK = 4;
+      const uint32 FAULT_SAFETY_INVARIANT = 8;
+      const uint32 FAULT_COMPONENT_RESTART_OR_DISCONNECT = 16;
+      const uint32 FAULT_ERROR_MONITOR_TIMEOUT = 32;
+    };
+    @verbatim (language="comment", text=
+      "O10ControlState — per-side control diagnostics." "\n"
+      "Wire contract: DOCS/01_知识/06_O10控制状态ROS接口契约.md." "\n"
+      "This is a read-only diagnostic interface; it does not participate in control" "\n"
+      "decisions.")
+    struct O10ControlState {
+      std_msgs::msg::Header header;
+
+      string side;
+
+      uint8 event;
+
+      uint8 phase;
+
+      boolean feedback_ready;
+
+      boolean error_monitor_ready;
+
+      boolean target_ready;
+
+      boolean target_fresh;
+
+      boolean fault_latched;
+
+      boolean motion_enabled;
+
+      uint8 target_result;
+
+      boolean command_published;
+
+      boolean__10 slew_limited;
+
+      uint32 fault_reason_mask;
+
+      uint16__10 hardware_error_bits;
+
+      boolean target_time_available;
+
+      builtin_interfaces::msg::Time last_target_input_stamp;
+
+      builtin_interfaces::msg::Time last_target_received_stamp;
+
+      boolean command_time_available;
+
+      builtin_interfaces::msg::Time last_command_sent_stamp;
+
+      boolean feedback_time_available;
+
+      builtin_interfaces::msg::Time last_feedback_received_stamp;
+
+      boolean error_status_time_available;
+
+      builtin_interfaces::msg::Time last_error_status_received_stamp;
+    };
+  };
+};

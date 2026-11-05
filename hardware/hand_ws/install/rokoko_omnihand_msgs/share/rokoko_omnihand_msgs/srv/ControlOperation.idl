@@ -1,0 +1,37 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rokoko_omnihand_msgs/srv/ControlOperation.srv
+// generated code does not contain a copyright notice
+
+#include "rokoko_omnihand_msgs/msg/O10ControlState.idl"
+
+module rokoko_omnihand_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "ControlOperation — request/response type for clear_fault. Wire contract: DOCS/01_知识/07_O10操作者控制操作ROS接口契约.md." "\n"
+      "The request is empty; the service name identifies the operation and side.")
+    struct ControlOperation_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    module ControlOperation_Response_Constants {
+      const uint8 CLEAR_FAULT_SUCCESS = 30;
+      const uint8 CLEAR_FAULT_ALREADY_CLEAR = 31;
+      const uint8 CLEAR_FAULT_REJECTED_CONTROL_STATE = 40;
+      const uint8 CLEAR_FAULT_REJECTED_COMMUNICATION_UNHEALTHY = 41;
+      const uint8 CLEAR_FAULT_REJECTED_ERROR_QUERY_TIMEOUT = 42;
+      const uint8 CLEAR_FAULT_REJECTED_ERROR_STATUS_INVALID = 43;
+      const uint8 CLEAR_FAULT_REJECTED_HARDWARE_ERROR_PRESENT = 44;
+      const uint8 CLEAR_FAULT_REJECTED_FEEDBACK_READ_TIMEOUT = 45;
+      const uint8 CLEAR_FAULT_REJECTED_FEEDBACK_INVALID = 46;
+      const uint8 CLEAR_FAULT_REJECTED_LIMITER_INIT_FAILED = 47;
+    };
+    struct ControlOperation_Response {
+      boolean success;
+
+      uint8 result_code;
+
+      string message;
+
+      rokoko_omnihand_msgs::msg::O10ControlState state;
+    };
+  };
+};

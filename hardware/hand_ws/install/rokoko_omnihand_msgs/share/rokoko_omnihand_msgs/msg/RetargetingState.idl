@@ -1,0 +1,98 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from rokoko_omnihand_msgs/msg/RetargetingState.msg
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Time.idl"
+#include "std_msgs/msg/Header.idl"
+
+module rokoko_omnihand_msgs {
+  module msg {
+    typedef uint8 uint8__5[5];
+    typedef boolean boolean__5[5];
+    typedef double double__5[5];
+    typedef int32 int32__5[5];
+    typedef uint32 uint32__5[5];
+    module RetargetingState_Constants {
+      const uint8 PHASE_INITIALIZING = 0;
+      const uint8 PHASE_COLLECTING_LENGTHS = 1;
+      const uint8 PHASE_WAITING_FIRST_VALID_IK = 2;
+      const uint8 PHASE_TRACKING = 3;
+      const uint8 PHASE_STALE = 4;
+      const uint8 PHASE_RECOVERY_CONFIRMING = 5;
+      const uint8 PHASE_RECOVERY_RESUMING = 6;
+      const uint8 PHASE_MODEL_ERROR = 7;
+      const uint8 LENGTH_COLLECTING = 0;
+      const uint8 LENGTH_FROZEN = 1;
+      const uint8 LENGTH_CURRENT_INVALID = 2;
+      const uint8 IK_UNINITIALIZED = 0;
+      const uint8 IK_VALID = 1;
+      const uint8 IK_INPUT_INVALID = 2;
+      const uint8 IK_SIDE_INVALID = 3;
+      const uint8 IK_RESIDUAL_EXCEEDED = 4;
+      const uint8 IK_SOLVER_ERROR = 5;
+      const uint8 IK_NOT_RUN_LENGTH_COLLECTING = 6;
+      const uint8 IK_NOT_RUN_STALE = 7;
+      const uint8 IK_MAPPING_VALID = 8;
+      const uint8 IK_MAPPING_REJECTED = 9;
+      @verbatim (language="comment", text=
+        "Named wire value for a finger whose solver was not executed.")
+      const uint8 SOLVER_NOT_RUN = 0;
+    };
+    @verbatim (language="comment", text=
+      "RetargetingState — per-side retargeting diagnostics." "\n"
+      "Wire contract: DOCS/01_知识/05_手部重定向状态ROS接口契约.md." "\n"
+      "This is a read-only diagnostic interface; it does not participate in O10" "\n"
+      "control decisions.")
+    struct RetargetingState {
+      std_msgs::msg::Header header;
+
+      string side;
+
+      builtin_interfaces::msg::Time input_stamp;
+
+      boolean solve_executed;
+
+      builtin_interfaces::msg::Time solve_finished_stamp;
+
+      double solve_duration_sec;
+
+      uint8 phase;
+
+      boolean ready;
+
+      boolean stale;
+
+      boolean command_published;
+
+      uint8__5 length_state;
+
+      uint8__5 ik_state;
+
+      @verbatim (language="comment", text=
+        "Legacy field name: in mapping mode the thumb element reports mapping" "\n"
+        "validity; use ik_state to distinguish mapping from an IK solve.")
+      @unit (value="0")
+      boolean__5 has_valid_ik;
+
+      boolean__5 used_previous_valid_target;
+
+      boolean__5 residual_available;
+
+      double__5 normalized_residual;
+
+      boolean__5 target_projection_applied;
+
+      boolean__5 target_projection_distance_available;
+
+      double__5 normalized_target_projection_distance;
+
+      int32__5 solver_result_code;
+
+      uint32__5 solver_evaluations;
+
+      uint32 recovery_valid_count;
+
+      double recovery_valid_duration_sec;
+    };
+  };
+};

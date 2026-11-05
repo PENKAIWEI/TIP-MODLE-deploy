@@ -1,0 +1,34 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from rokoko_omnihand_msgs/srv/ReadO10ActiveJoints.srv
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Time.idl"
+
+module rokoko_omnihand_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Empty request. Side is identified by the service name.")
+    struct ReadO10ActiveJoints_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    typedef double double__10[10];
+    module ReadO10ActiveJoints_Response_Constants {
+      const uint8 READ_SUCCESS = 0;
+      const uint8 READ_DEVICE_UNAVAILABLE = 1;
+      const uint8 READ_HARDWARE_ERROR = 2;
+      const uint8 READ_INVALID_RESULT = 3;
+      const uint8 READ_INTERNAL_ERROR = 4;
+    };
+    struct ReadO10ActiveJoints_Response {
+      boolean success;
+
+      uint8 result_code;
+
+      string message;
+
+      builtin_interfaces::msg::Time sample_stamp;
+
+      double__10 position;
+    };
+  };
+};

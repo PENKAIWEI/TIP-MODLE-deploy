@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-03",
+  "reference_root": "sandisk100_inference",
+  "target_root": "TIP_demo_deploy",
+  "reference_sha256": {
+    "pour_deploy/common.py": "b0115d115a6f42511b62b1266119b7d88f8bd2625f7b243318bf494c9b6589ee",
+    "pour_deploy/controller.py": "3acd88231d7984d1c749b76752ce50c4075ae2f21ebeda4686583980395dda1a",
+    "pour_deploy/sensors.py": "84432f6581d4d6a2789fa8f655a887e2147000da70c261a77e90a7ae6af34b80",
+    "pour_deploy/stream.py": "cac31e76e2fd945fb5cd908becfe63a16607920e808b980cee510d850640b228",
+    "pour_deploy/server.py": "1319ddc68b7caa1dfce03520353f464c4ab53ad657178d216aa27f99897adf48",
+    "pour_deploy/runtime.py": "9bffe1f9927604da016b991b5d1def8894b382790e680e45d9cdebe130d1b752",
+    "deploy/reset.json": "e7ab58869f2512d5df3c68f1c968d7c40d3c04a0afa3e52183511d170ebe7ea6",
+    "data/replay.npz": "f8d9d1f65ac5d09fc1457db2a9920c01368cfc7c09ae20879b0ae02007e27195"
+  },
+  "target_contract_sha256": {
+    "hardware/arm_ws/MODEL_CONTROL.md": "0f6b6af5bc4ddec296e7a57d0e1870c99fdb3ace1bb10d6b9b06b17c4a81e69f",
+    "hardware/arm_ws/arm_model_control/arm_model_control/model_commands.py": "10b42f05af425dd457e4cc65c06b50cf570609291b940017ae07d54f78e7372b",
+    "hardware/arm_ws/arm_model_control/arm_model_control/model_node.py": "92df4a98535f10c8b623109e45a74e2d75c22e784f766c854212070752945790",
+    "hardware/arm_ws/rm_65.urdf": "ed8800aef0cce10f20ce5e1bf4091b4e1d9dd3275b8e662fd44dde2e5dba6418",
+    "hardware/cameras_ws/config.yaml": "84d0e00b0af2a8b792395f5d43b9a37f04d61af63620ab78345993e8ceaa8310",
+    "hardware/hand_ws/src/collection/o10_contracts/omnihand_o10_contracts/joints.py": "f947aec935a020b647a7bfcf1516f0e55ba41b19ebaa7243ae3ffd2e34c5be26",
+    "hardware/hand_ws/src/collection/ros_interfaces/msg/O10ControlState.msg": "e967623d5f48b0c0e8270ef9782bc79632d25058723f48df3c912b23393c3d9f",
+    "手部接口文档.md": "8270d7cd830578ab7837f6f06e11afa4550e80b96497f9400265fc8613b10c87",
+    "相机接口文档.md": "3fb4dfa204128d7f07bd27aa0e24149cff746157914bbae0667c8ecdd4523259"
+  },
+  "bridge_sha256": {
+    ".gitignore": "fa2aad4575a3e492b602f54507296cbbb1f42ea8164384e9f3072ccdcf96a788",
+    "config/bridge.json": "3407b0625ea83d2c1d293599835cdfdc72bbd6f1fe590bd1747a1b4f53d76692",
+    "config/reset.json": "e7ab58869f2512d5df3c68f1c968d7c40d3c04a0afa3e52183511d170ebe7ea6",
+    "data/replay.npz": "f8d9d1f65ac5d09fc1457db2a9920c01368cfc7c09ae20879b0ae02007e27195",
+    "README.md": "88fb931ae04426d9f97afe28bac0e3d1a95638827bae4049bcd37defe47baba8",
+    "requirements.txt": "4bbba18d879d7f814755c9819549f7de28b2bf4c437f6d4af50e187c04f3f5f1",
+    "scripts/bridge.sh": "1c34b8d684cbcf60999720e4b0bf9d86ded5fa80256032138818728c5336ceb7",
+    "scripts/model_server.sh": "20cd3cb19da681604322ec61fe375f509befdfd593a9d9f3992e4b34efce35e0",
+    "tests/test_bridge.py": "35fc750197c052211546043cd46925f1de1195d7c9e22edd2db1fc4f9de89f2c",
+    "tip_bridge/__init__.py": "3559a5232cd7d3084900348221b382e121c765fb0261a05c24f13fed726c0af4",
+    "tip_bridge/common.py": "c705233dcd8c1324cd24835f72a23cc70cf0fc6283f92b43a801d87b6553c9de",
+    "tip_bridge/config.py": "e31a4943a76b4acc7d0010934de52033a3901d4e9a2ebb099cdea8378b11db49",
+    "tip_bridge/contracts.py": "c457c13e58619581a638c131054ca4e27a910e6581f459030afb29ccc0ebf068",
+    "tip_bridge/controller.py": "b3c52a20b7ad1bfd8eaa8cd5513e3653ce8d631dd425537e0b4c185ac470370c",
+    "tip_bridge/inspect_config.py": "6a0066dcdb3357c8227b8593e4f3ad95f7df6d76284b9c6500b727ab88068271",
+    "tip_bridge/runtime.py": "9bffe1f9927604da016b991b5d1def8894b382790e680e45d9cdebe130d1b752",
+    "tip_bridge/sensors.py": "fde3f40ffffd56d72063a48f4181f964167716079d3edee1ba6dee51854ce03d",
+    "tip_bridge/server.py": "d0c95dd5a536992c1dd741bab540ecf26be9e8b3b16f1ba3b8ba5ce231455d5b",
+    "tip_bridge/stream.py": "e21e85affbf2e165e7f65db18076368582793a59e4047ee765836c984b151610",
+    "VALIDATION.json": "24b0e1a5c017df56a363d35dc7f79732a9bd14db91a15651b7c0e113e08dd3f9"
+  }
+}

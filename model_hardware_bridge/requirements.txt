@@ -1,0 +1,8 @@
+# CPU bridge dependencies; use the target ROS/Python environment.
+numpy
+Pillow
+opencv-python
+PyYAML
+# ROS 2 Jazzy and rokoko_omnihand_msgs / omnihand_o10_contracts come from hardware/hand_ws.
+# infer additionally needs the original matching openpi.fastslow.buffer source.
+# The optional model server uses the original model's existing JAX/OpenPI environment.

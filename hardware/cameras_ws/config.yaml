@@ -1,0 +1,39 @@
+# 停止相机后修改，重启生效。
+# id: 节点编号，1 对应 /cam1/cam1。
+# name: 相机标签，仅用于日志；实际发布名称由下面三个完整话题字段决定。
+# serial: 物理序列号，必须加引号；用 rs-enumerate-devices -s 查询。
+# enabled: true 启用，false 停用；至少启用一路。
+# color_module: D435 用 rgb_camera，D405 用 depth_module。
+# color_profile: 宽x高x帧率，必须受设备支持。
+# 只检查配置：python3 hardware/cameras_ws/rs_4cam.launch.py --check-config
+
+cameras:
+  - id: 1
+    name: head
+    serial: "233522072433"
+    enabled: true
+    color_module: rgb_camera
+    color_profile: "640x480x30"
+    image_topic: "/observation/head/images"
+    compressed_topic: "/observation/head/images/compressed"
+    camera_info_topic: "/observation/head/camera_info"
+
+  - id: 2
+    name: left_wrist
+    serial: "352122271900"
+    enabled: true
+    color_module: depth_module
+    color_profile: "640x480x30"
+    image_topic: "/observation/left_wrist/images"
+    compressed_topic: "/observation/left_wrist/images/compressed"
+    camera_info_topic: "/observation/left_wrist/camera_info"
+
+  - id: 3
+    name: right_wrist
+    serial: "260422270009"
+    enabled: true
+    color_module: depth_module
+    color_profile: "640x480x30"
+    image_topic: "/observation/right_wrist/images"
+    compressed_topic: "/observation/right_wrist/images/compressed"
+    camera_info_topic: "/observation/right_wrist/camera_info"

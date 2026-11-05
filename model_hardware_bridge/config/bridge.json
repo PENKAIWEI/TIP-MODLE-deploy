@@ -1,0 +1,21 @@
+{
+  "model_url": "http://192.168.101.6:18774",
+  "token_file": "config/token",
+  "checkpoint": "/data/checkpoints_vtla_sandisk100/vtla_sandisk100_direct_full/base_touch_joint_46k_seed43_20261024/23000",
+  "camera_config": "hardware/cameras_ws/config.yaml",
+  "camera_roles": {"top": "head", "left_wrist": "left_wrist", "right_wrist": "right_wrist"},
+  "arm_urdf": "hardware/arm_ws/rm_65.urdf",
+  "reset_file": "config/reset.json",
+  "startup_timeout_s": 10.0,
+  "camera_max_age_s": 0.1,
+  "camera_sync_tolerance_s": 0.1,
+  "joint_max_age_s": 0.15,
+  "state_bracket_s": 0.1,
+  "driver_state_max_age_s": 0.5,
+  "source_future_tolerance_s": 0.002,
+  "arm_feedback_lead_rad": 0.06,
+  "tactile_mode": "hold",
+  "tactile_fallback_after_s": 0.15,
+  "tactile_strict_sample_age_s": 0.05,
+  "tactile_strict_timeout_s": 0.15
+}
