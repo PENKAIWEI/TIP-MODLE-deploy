@@ -31,6 +31,8 @@ cd /home/hit/TIP_deploy
 
 `stop_status: REQUESTED` 只表示收到停止请求。子进程退出后才记为 `CONFIRMED`，其依据是**该 Bridge 进程已无法继续发布目标**；这不宣称机械臂已物理静止。复位会从实时反馈开始，最终须得到 `reset_complete`。若上一执行未释放控制权，复位返回失败，不会与其同时运行。执行日志及状态记录保存在 `model_hardware_bridge/runs/agent_api/`；接口服务重启后，未完成执行标记为 `UNKNOWN`，不会猜测其成功。
 
+如果复位超时后停止过程仍未结束，调用可能返回 `state: STOPPING`。此时不能启动下一策略；应保留日志并确认该 Bridge 执行已经退出。
+
 ## 调用顺序
 
 ```text
@@ -70,7 +72,34 @@ curl -sS -H 'Content-Type: application/json' \
   -d '{"execution_id":"pour-001"}' http://127.0.0.1:18776/stop_policy
 ```
 
-`reset_to_initial` 会等待运动完成，调用方 HTTP 超时应大于 `timeout_s + 30` 秒。`check_policy` 只负责启动和检查模型，不会调用 `infer`。相机观测仍通过项目已有 ROS 话题订阅，接口服务不传图像。
+Agent 也可直接使用本目录的标准库 Python 客户端；它不会自动重发请求：
+
+```python
+import time
+from agent_api.client import AgentBridgeClient
+
+bridge = AgentBridgeClient("http://127.0.0.1:18776")
+hardware = bridge.start_hardware()
+if not hardware["ready"]:
+    raise RuntimeError(hardware["issues"])
+for _ in range(150):
+    policy = bridge.check_policy("pour_tea")
+    if policy["model_state"] == "READY":
+        break
+    if policy["model_state"] in ("ERROR", "NOT_READY"):
+        raise RuntimeError(policy["reason"])
+    time.sleep(2)
+else:
+    raise TimeoutError("Model did not become ready")
+reset = bridge.reset_to_initial("reset-001", timeout_s=60)
+if reset["state"] != "COMPLETED":
+    raise RuntimeError(reset["reason"])
+started = bridge.start_policy("pour-001", "pour_tea", {}, max_duration_s=100)
+# Agent 根据已有相机话题判断完成后：
+stopping = bridge.stop_policy("pour-001")
+```
+
+`start_hardware` 的 HTTP 超时应大于 `ready_timeout_s + 60` 秒；`reset_to_initial` 会等待运动完成，调用方超时应大于 `timeout_s + 70` 秒。`check_policy` 只负责启动和检查模型，不会调用 `infer`。相机观测仍通过项目已有 ROS 话题订阅，接口服务不传图像。
 
 ## 实现边界
 

@@ -63,6 +63,7 @@ def bridge_environment(inherited: dict[str, str]) -> dict[str, str]:
     env.pop("CONDA_PREFIX", None)
     env.pop("DEXHIT_COLLECTION_PREFIX", None)
     env.update(
+        TIP_BRIDGE_PYTHON="/usr/bin/python3",
         TIP_OPENPI_SRC=str(MODEL_ROOT / "src"),
         TIP_MODEL_TOKEN_FILE=str(MODEL_TOKEN_FILE),
         TIP_MODEL_URL=MODEL_URL,

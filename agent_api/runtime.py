@@ -12,6 +12,7 @@ import socket
 import subprocess
 import threading
 import time
+import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -98,6 +99,8 @@ class Runtime:
         for line in self._journal.read_text(encoding="utf-8").splitlines():
             try:
                 record = json.loads(line)
+                if not all(key in record for key in ("execution_id", "kind", "state", "updated_at")):
+                    continue
                 self._records[record["execution_id"]] = record
             except (ValueError, KeyError, TypeError):
                 continue
@@ -128,9 +131,13 @@ class Runtime:
 
     @staticmethod
     def _positive_seconds(value: object, name: str) -> float:
-        if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
+        try:
+            seconds = float(value) if type(value) in (int, float) else math.nan
+        except (OverflowError, ValueError):
+            seconds = math.nan
+        if not math.isfinite(seconds) or seconds <= 0:
             raise ApiError("INVALID_ARGUMENT", f"{name} must be a positive finite number of seconds")
-        return float(value)
+        return seconds
 
     @staticmethod
     def _validate_policy(value: object) -> str:
@@ -302,22 +309,39 @@ class Runtime:
 
     def _hardware_status(self) -> dict:
         devices = {}
+        issues = []
         for role in HARDWARE_COMMANDS:
             slot = self._hardware.get(role)
             running = bool(slot and slot.process.poll() is None)
+            reason = f"launcher exited with code {slot.process.returncode}" if slot and not running else None
             devices[role] = {
                 "running": running or self._hardware_external.get(role, False),
                 "managed": running,
                 "log_path": str(slot.log_path) if slot else None,
-                "reason": f"launcher exited with code {slot.process.returncode}" if slot and not running else None,
+                "reason": reason,
             }
-        return {"ready": self._hardware_ready, "devices": devices, "reason": self._hardware_reason}
+            if reason:
+                issues.append({"device": role, "reason": reason})
+        if self._hardware_reason:
+            lower = self._hardware_reason.lower()
+            if "hand" in lower or "o10" in lower or re.search(r"\b[lr]h\b", lower):
+                device = "hand"
+            elif "arm" in lower or re.search(r"\b[lr]a\b", lower):
+                device = "arm"
+            elif "camera" in lower or "image" in lower or "wrist" in lower:
+                device = "camera"
+            else:
+                device = "observation"
+            issues.append({"device": device, "reason": self._hardware_reason})
+            if device in devices and devices[device]["reason"] is None:
+                devices[device]["reason"] = self._hardware_reason
+        return {"ready": self._hardware_ready, "devices": devices, "issues": issues, "reason": self._hardware_reason}
 
     def start_hardware(self, ready_timeout_s: object = 90) -> dict:
         timeout = self._positive_seconds(ready_timeout_s, "ready_timeout_s")
         with self._hardware_start_lock:
             with self._lock:
-                if self._active is not None:
+                if self._active is not None or self._pending_reset is not None:
                     raise ApiError("RESOURCE_BUSY", "A Bridge execution is active")
             nodes = self._ros_nodes()
             self._hardware_external = {
@@ -333,7 +357,13 @@ class Runtime:
                     env = dict(os.environ)
                     env.pop("CONDA_PREFIX", None)
                     env.pop("DEXHIT_COLLECTION_PREFIX", None)
-                    self._hardware[role] = self._spawn(role, command, env)
+                    try:
+                        self._hardware[role] = self._spawn(role, command, env)
+                    except OSError as exc:
+                        self._hardware_ready = False
+                        self._hardware_reason = f"Cannot launch {role}: {exc}"
+                        print(f"[agent_api] {self._hardware_reason}", flush=True)
+                        return self._hardware_status()
             deadline = time.monotonic() + timeout
             reason = "Hardware feedback did not become ready"
             while time.monotonic() < deadline:
@@ -413,6 +443,8 @@ class Runtime:
                 return self._policy_response(policy_id, "ERROR", False, f"Model service exited; see {model.log_path}")
             try:
                 status = self._model_status()
+            except (FileNotFoundError, PermissionError, ValueError, urllib.error.HTTPError) as exc:
+                return self._policy_response(policy_id, "ERROR", False, f"Model status check failed: {type(exc).__name__}")
             except Exception as exc:
                 return self._policy_response(policy_id, "LOADING", False, f"Model is loading: {type(exc).__name__}")
             expected = POLICIES[policy_id]
@@ -422,7 +454,8 @@ class Runtime:
             if not status.get("ready") or not status.get("live_budget_ok"):
                 return self._policy_response(policy_id, "NOT_READY", False, "Model warmup or live latency budget failed")
             with self._lock:
-                can_start = self._hardware_ready and self._active is None and self._pending_reset is None
+                hardware_alive = all(slot.process.poll() is None for slot in self._hardware.values())
+                can_start = self._hardware_ready and hardware_alive and self._active is None and self._pending_reset is None
                 reason = None if can_start else "Hardware is not ready or another execution is active"
                 return self._policy_response(policy_id, "READY", can_start, reason)
 
@@ -435,6 +468,7 @@ class Runtime:
                 "model_ready": model_state == "READY",
                 "can_start": can_start,
                 "reason": reason,
+                "active_execution_id": self._active.execution_id if self._active else None,
                 "execution": copy.deepcopy(self._records.get(execution_id)) if execution_id else None,
             }
 
@@ -502,8 +536,9 @@ class Runtime:
                 record = self._records[execution_id]
                 if record["kind"] != "reset":
                     raise ApiError("DUPLICATE_EXECUTION_ID", "execution_id belongs to another operation")
-                while record["state"] not in TERMINAL:
-                    self._changed.wait(timeout=1)
+                retry_deadline = time.monotonic() + timeout + 50
+                while record["state"] not in TERMINAL and time.monotonic() < retry_deadline:
+                    self._changed.wait(timeout=min(1, retry_deadline - time.monotonic()))
                 return copy.deepcopy(record)
             if not self._hardware_ready:
                 raise ApiError("HARDWARE_NOT_READY", self._hardware_reason or "Call start_hardware first")
@@ -514,8 +549,10 @@ class Runtime:
             record = self._new_record(execution_id, "reset")
             self._pending_reset = execution_id
             deadline = time.monotonic() + 20
-            while self._active is not None and time.monotonic() < deadline:
+            while self._active is not None and record["state"] != "STOPPED" and time.monotonic() < deadline:
                 self._changed.wait(timeout=min(1, deadline - time.monotonic()))
+            if record["state"] == "STOPPED":
+                return copy.deepcopy(record)
             if self._active is not None:
                 record["state"] = "FAILED"
                 record["reason"] = "Previous Bridge execution did not release control"
@@ -541,7 +578,11 @@ class Runtime:
                 self._changed.wait(timeout=min(1, deadline - time.monotonic()))
             if record["state"] not in TERMINAL:
                 self._request_stop(self._active)
-                return {**copy.deepcopy(record), "reason": "Reset deadline elapsed; stop requested, final state pending"}
+                stop_deadline = time.monotonic() + 10
+                while record["state"] not in TERMINAL and time.monotonic() < stop_deadline:
+                    self._changed.wait(timeout=min(1, stop_deadline - time.monotonic()))
+                if record["state"] not in TERMINAL:
+                    return {**copy.deepcopy(record), "reason": "Reset deadline elapsed; stop requested, final state pending"}
             return copy.deepcopy(record)
 
     def _request_stop(self, slot: Slot | None) -> None:
@@ -573,6 +614,19 @@ class Runtime:
     def stop_motion(self, execution_id: object) -> dict:
         execution_id = self._validate_id(execution_id)
         with self._changed:
+            if self._pending_reset == execution_id and (
+                self._active is None or self._active.execution_id != execution_id
+            ):
+                record = self._records[execution_id]
+                record["state"] = "STOPPED"
+                record["stop_status"] = "CONFIRMED"
+                record["stop_basis"] = "canceled_before_start"
+                record["reason"] = "Reset canceled before motion began"
+                record["finished_at"] = datetime.now(timezone.utc).isoformat()
+                self._pending_reset = None
+                self._save(record)
+                self._changed.notify_all()
+                return {"accepted": True, "execution_id": execution_id, "stop_status": "CONFIRMED"}
             slot = self._active
             if slot is None or slot.execution_id != execution_id:
                 raise ApiError("NOT_ACTIVE", "This execution_id is not the active Bridge execution")
@@ -598,7 +652,13 @@ class Runtime:
             try:
                 active.process.wait(timeout=15)
             except subprocess.TimeoutExpired:
-                print("[agent_api] Bridge did not exit; hardware launchers remain running", flush=True)
+                try:
+                    active.process.kill()
+                    active.process.wait(timeout=5)
+                except ProcessLookupError:
+                    pass
+                print("[agent_api] Bridge required forced exit; hardware launchers remain running for inspection", flush=True)
+                self._lease.close()
                 return
         with self._lock:
             children = [self._model] + [self._hardware.get(role) for role in ("arm", "hand", "camera")]
